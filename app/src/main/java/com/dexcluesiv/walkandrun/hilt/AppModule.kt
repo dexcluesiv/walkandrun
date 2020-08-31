@@ -15,6 +15,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
 
 /**
@@ -26,7 +27,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideRunDb(app: Application): RunDb {
+    fun provideRunDb(@ApplicationContext app: Application): RunDb {
         return Room.databaseBuilder(app, RunDb::class.java, DATABASE_NAME)
             .fallbackToDestructiveMigration()
             .build()
