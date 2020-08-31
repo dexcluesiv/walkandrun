@@ -27,7 +27,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideRunDb(@ApplicationContext app: Application): RunDb {
+    fun provideRunDb(app: Application): RunDb {
         return Room.databaseBuilder(app, RunDb::class.java, DATABASE_NAME)
             .fallbackToDestructiveMigration()
             .build()

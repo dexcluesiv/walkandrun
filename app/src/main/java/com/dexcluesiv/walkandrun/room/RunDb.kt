@@ -7,7 +7,8 @@ import com.dexcluesiv.walkandrun.utils.Converters
 
 @Database(
     entities = [Run::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class RunDb: RoomDatabase() {
