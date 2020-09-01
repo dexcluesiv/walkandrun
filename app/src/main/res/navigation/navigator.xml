@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/navigator.xml"
     app:startDestination="@id/setupFragment">
 
+    <action
+        android:id="@+id/action_global_launch_trackkingFragment"
+        app:destination="@id/trackingFragment"
+        app:launchSingleTop="true"/>
+
     <fragment
         android:id="@+id/runFragment"
         android:name="com.dexcluesiv.walkandrun.ui.fragments.RunFragment"

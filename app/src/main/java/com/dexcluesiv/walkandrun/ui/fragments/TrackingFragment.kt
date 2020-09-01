@@ -1,11 +1,14 @@
 package com.dexcluesiv.walkandrun.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.dexcluesiv.walkandrun.R
+import com.dexcluesiv.walkandrun.service.Tracker
 import com.dexcluesiv.walkandrun.ui.viewmodel.MainViewModel
+import com.dexcluesiv.walkandrun.utils.Constants.Companion.ACTION_START_OR_RESUME_SERVICE
 import com.google.android.gms.maps.GoogleMap
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_tracking.*
@@ -26,6 +29,21 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
 
             map=it
         }
+
+        btnToggleRun.setOnClickListener {
+
+            sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
+        }
+    }
+
+    private fun sendCommandToService(command: String) {
+
+        Intent(requireContext(), Tracker::class.java).also {
+
+            it.action=command
+            requireContext().startService(it)
+        }
+
     }
 
     override fun onResume() {
