@@ -41,7 +41,7 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.Q){
 
             EasyPermissions.requestPermissions(this,
-                "You are requested to enable Location Permission before running/walking.",
+                "You are requested to enable ALL THE TIME Location Permission before running/walking.",
                 REQUEST_CODE_LOCATION_PERMISSION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -49,7 +49,7 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
         }else{
 
             EasyPermissions.requestPermissions(this,
-                "You are requested to enable Location Permission before running/walking.",
+                "You are requested to enable ALL THE TIME Location Permission before running/walking.",
                 REQUEST_CODE_LOCATION_PERMISSION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
