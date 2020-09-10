@@ -5,11 +5,20 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.dexcluesiv.walkandrun.R
+import com.dexcluesiv.walkandrun.service.Polyline
 import com.dexcluesiv.walkandrun.service.Tracker
 import com.dexcluesiv.walkandrun.ui.viewmodel.MainViewModel
+import com.dexcluesiv.walkandrun.utils.Commons
+import com.dexcluesiv.walkandrun.utils.Constants.Companion.ACTION_PAUSE_SERVICE
 import com.dexcluesiv.walkandrun.utils.Constants.Companion.ACTION_START_OR_RESUME_SERVICE
+import com.dexcluesiv.walkandrun.utils.Constants.Companion.MAP_ZOOM
+import com.dexcluesiv.walkandrun.utils.Constants.Companion.POLYLINE_COLOR
+import com.dexcluesiv.walkandrun.utils.Constants.Companion.POLYLINE_WIDTH
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.PolylineOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_tracking.*
 
@@ -20,19 +29,94 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
 
     private var map: GoogleMap?=null
 
+    private var isTracking=false
+    private var pathPoints= mutableListOf<Polyline>()
+    private var curTimeInMillis = 0L
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         mapView.onCreate(savedInstanceState)
-
-        mapView.getMapAsync{
-
-            map=it
+        btnToggleRun.setOnClickListener {
+            toggleRun()
+        }
+        mapView.getMapAsync {
+            map = it
+            addAllPolylines()
         }
 
-        btnToggleRun.setOnClickListener {
+        subscribeToObservers()
+    }
 
+    private fun subscribeToObservers() {
+        Tracker.isTracking.observe(viewLifecycleOwner, Observer {
+            updateTracking(it)
+        })
+
+        Tracker.pathPoints.observe(viewLifecycleOwner, Observer {
+            pathPoints = it
+            addLatestPolyline()
+            moveCameraToUser()
+        })
+
+        Tracker.timeRunInMillis.observe(viewLifecycleOwner, Observer {
+
+            curTimeInMillis=it
+            val formattedTime = Commons.getFormattedStopWatchTime(curTimeInMillis, true)
+            tvTimer.text = formattedTime
+        })
+    }
+
+    private fun toggleRun() {
+        if(isTracking) {
+            sendCommandToService(ACTION_PAUSE_SERVICE)
+        } else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
+        }
+    }
+
+    private fun addAllPolylines() {
+        for(polyline in pathPoints) {
+            val polylineOptions = PolylineOptions()
+                .color(POLYLINE_COLOR)
+                .width(POLYLINE_WIDTH)
+                .addAll(polyline)
+            map?.addPolyline(polylineOptions)
+        }
+    }
+
+
+    private fun updateTracking(isTracking: Boolean) {
+        this.isTracking = isTracking
+        if(!isTracking) {
+            btnToggleRun.text = "Start"
+            btnFinishRun.visibility = View.VISIBLE
+        } else {
+            btnToggleRun.text = "Stop"
+            btnFinishRun.visibility = View.GONE
+        }
+    }
+
+    private fun moveCameraToUser() {
+        if(pathPoints.isNotEmpty() && pathPoints.last().isNotEmpty()) {
+            map?.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    pathPoints.last().last(),
+                    MAP_ZOOM
+                )
+            )
+        }
+    }
+
+    private fun addLatestPolyline() {
+        if(pathPoints.isNotEmpty() && pathPoints.last().size > 1) {
+            val preLastLatLng = pathPoints.last()[pathPoints.last().size - 2]
+            val lastLatLng = pathPoints.last().last()
+            val polylineOptions = PolylineOptions()
+                .color(POLYLINE_COLOR)
+                .width(POLYLINE_WIDTH)
+                .add(preLastLatLng)
+                .add(lastLatLng)
+            map?.addPolyline(polylineOptions)
         }
     }
 
